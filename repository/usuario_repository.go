@@ -18,7 +18,7 @@ func NewUsuarioRepository(connection *sql.DB) UsuarioRepository {
 	}
 }
 func (us *UsuarioRepository) GetUsuarios() ([]model.Usuarios, error) {
-	query := "SELECT usuario_id,created_at,updated_at,delete_at,nome,email,status,senha FROM tb_usuarios"
+	query := "SELECT usuario_id,created_at,updated_at,delete_at,nome,email,status,senha,uuid FROM tb_usuarios"
 	rows, err := us.connection.Query(query)
 	if err != nil {
 		fmt.Println(err)
@@ -37,6 +37,7 @@ func (us *UsuarioRepository) GetUsuarios() ([]model.Usuarios, error) {
 			&usuariosObj.Email,
 			&usuariosObj.Status,
 			&usuariosObj.Senha,
+			&usuariosObj.Uuid_usuario,
 		)
 
 		if err != nil {
