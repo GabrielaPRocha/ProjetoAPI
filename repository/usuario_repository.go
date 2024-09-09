@@ -76,3 +76,24 @@ func (us *UsuarioRepository) CreateUsuarios(usuario model.Usuarios) (int, error)
 
 	return int(id), nil
 }
+func (us *UsuarioRepository) DeleteUsuarios(usuario model.Usuarios) (int, error) {
+	query, err := us.connection.Prepare("UPDATE tb_categoria SET deleted_at = ? WHERE categoria_id = ?")
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	defer query.Close()
+
+	result, err := query.Exec(usuario.Delete_at, usuario.Usuario_id)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	return int(rowsAffected), nil
+}

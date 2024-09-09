@@ -15,8 +15,8 @@ func NewLocalUseCase(repo *repository.LocalRepository) LocalUseCase {
 	}
 }
 
-func (su *LocalUseCase) GetLocais() ([]model.Locais, error) {
-	return su.repository.GetLocais()
+func (us *LocalUseCase) GetLocais() ([]model.Locais, error) {
+	return us.repository.GetLocais()
 }
 
 func (us *LocalUseCase) CreateLocais(Local model.Locais) (model.Locais, error) {
@@ -25,5 +25,12 @@ func (us *LocalUseCase) CreateLocais(Local model.Locais) (model.Locais, error) {
 		return model.Locais{}, err
 	}
 	Local.Local_id = LocalId
+	return Local, nil
+}
+func (us *LocalUseCase) DeleteLocais(Local model.Locais) (model.Locais, error) {
+	_, err := us.repository.DeleteLocais(Local)
+	if err != nil {
+		return model.Locais{}, err
+	}
 	return Local, nil
 }

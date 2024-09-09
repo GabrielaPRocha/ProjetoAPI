@@ -38,3 +38,16 @@ func (u *LocaisController) CreateLocais(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusCreated, insertedLocal)
 }
+func (u *LocaisController) DeleteLocais(ctx echo.Context) error {
+	var local model.Locais
+	err := ctx.Bind(&local)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	deletedLocal, err := u.LocalUseCase.DeleteLocais(local)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+	}
+	return ctx.JSON(http.StatusOK, deletedLocal)
+}

@@ -26,3 +26,10 @@ func (us *UsuarioUsecase) CreateUsuarios(usuario model.Usuarios) (model.Usuarios
 	usuario.Usuario_id = usuarioId
 	return usuario, nil
 }
+func (us *UsuarioUsecase) DeleteUsuarios(usuario model.Usuarios) (model.Usuarios, error) {
+	_, err := us.repository.DeleteUsuarios(usuario)
+	if err != nil {
+		return model.Usuarios{}, err
+	}
+	return usuario, nil
+}

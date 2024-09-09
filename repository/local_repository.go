@@ -69,3 +69,24 @@ func (us *LocalRepository) CreateLocais(local model.Locais) (int, error) {
 
 	return int(id), nil
 }
+func (us *LocalRepository) DeleteLocais(locais model.Locais) (int, error) {
+	query, err := us.connection.Prepare("UPDATE tb_local SET deleted_at = ? WHERE local_id = ?")
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	defer query.Close()
+
+	result, err := query.Exec(locais.Delete_at, locais.Local_id)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	return int(rowsAffected), nil
+}
