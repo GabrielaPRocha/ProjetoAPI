@@ -1,4 +1,4 @@
-package usecase
+package local
 
 import (
 	"go-api/model"

@@ -2,17 +2,17 @@ package controller
 
 import (
 	"go-api/model"
-	"go-api/usecase"
+	"go-api/usecase/usuario"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type UsuariosController struct {
-	UsuarioUsecase usecase.UsuarioUsecase
+	UsuarioUsecase usuario.UsuarioUsecase
 }
 
-func NewUsuariosController(usecase usecase.UsuarioUsecase) UsuariosController {
+func NewUsuariosController(usecase usuario.UsuarioUsecase) UsuariosController {
 	return UsuariosController{
 		UsuarioUsecase: usecase,
 	}

@@ -2,14 +2,14 @@ package viewmodel
 
 import (
 	"go-api/model"
-	"go-api/usecase"
+	"go-api/usecase/participante"
 )
 
 type ParticipantesViewModel struct {
-	ParticipanteUseCase usecase.ParticipanteUsecase
+	ParticipanteUseCase participante.ParticipanteUsecase
 }
 
-func NewParticipantesViewModel(usecase usecase.ParticipanteUsecase) ParticipantesViewModel {
+func NewParticipantesViewModel(usecase participante.ParticipanteUsecase) ParticipantesViewModel {
 	return ParticipantesViewModel{
 		ParticipanteUseCase: usecase,
 	}

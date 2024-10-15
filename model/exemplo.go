@@ -16,8 +16,8 @@ type Compromisso struct {
 	Created_at     string  `json:"created_at"`
 	Updated_at     string  `json:"updated_at"`
 	Delete_at      *string `json:"delete_at"`
-	Datainicio     string  `json:"datainicio"`
-	Datafim        string  `json:"datafim"`
-	Nome           string  `json:"nome"`
-	Participantes  []Participantes
+	Horainicio     string  `json:"horainicio"`
+	Horafim        string  `json:"horafim"`
+	//Nome           string  `json:"nome"`
+	Participantes []Participantes
 }

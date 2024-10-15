@@ -17,7 +17,7 @@ func NewParticipanteRepository(connection *sql.DB) *ParticipanteRepository {
 }
 
 func (us *ParticipanteRepository) GetParticipante() ([]model.Participantes, error) {
-	query := "SELECT local_id, created_at, updated_at, delete_at, nome, presencial, endereco FROM tb_local"
+	query := `SELECT idparticipantes, created_at, updated_at, delete_at, usuario_id,compromisso_id FROM tb_participantes `
 	rows, err := us.connection.Query(query)
 	if err != nil {
 		fmt.Println(err)

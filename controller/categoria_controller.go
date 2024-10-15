@@ -2,17 +2,17 @@ package controller
 
 import (
 	"go-api/model"
-	"go-api/usecase"
+	"go-api/usecase/categoria"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type CategoriaController struct {
-	CategoriaUseCase usecase.CategoriaUseCase
+	CategoriaUseCase categoria.CategoriaUseCase
 }
 
-func NewCategoriaController(usecase usecase.CategoriaUseCase) CategoriaController {
+func NewCategoriaController(usecase categoria.CategoriaUseCase) CategoriaController {
 	return CategoriaController{
 		CategoriaUseCase: usecase,
 	}

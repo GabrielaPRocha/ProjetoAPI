@@ -1,4 +1,4 @@
-package usecase
+package participante
 
 import (
 	"go-api/model"
@@ -15,7 +15,7 @@ func NewParticipanteUsecase(repo repository.ParticipanteRepository) Participante
 	}
 }
 
-func (pu *ParticipanteUsecase) GetParticipantes() ([]model.Participantes, error) {
+func (pu ParticipanteUsecase) GetParticipantes() ([]model.Participantes, error) {
 	return pu.repository.GetParticipante()
 }
 

@@ -2,17 +2,17 @@ package controller
 
 import (
 	"go-api/model"
-	"go-api/usecase"
+	"go-api/usecase/local"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type LocaisController struct {
-	LocalUseCase usecase.LocalUseCase
+	LocalUseCase local.LocalUseCase
 }
 
-func NewLocaisController(usecase usecase.LocalUseCase) LocaisController {
+func NewLocaisController(usecase local.LocalUseCase) LocaisController {
 	return LocaisController{
 		LocalUseCase: usecase,
 	}
