@@ -35,3 +35,10 @@ func (pu *ParticipanteUsecase) DeleteParticipantes(participante model.Participan
 	}
 	return participante, nil
 }
+
+func (pu *ParticipanteUsecase) UpdateParticipanteCompromisso(uuid string, newParticipantes []model.Participantes) (model.Compromisso, error) {
+	compromisso, err := pu.repository.GetCompromissos(uuid)
+	if err != nil {
+		return model.Compromisso{}, err
+	}
+}
