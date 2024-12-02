@@ -53,6 +53,7 @@ func main() {
 	server.POST("/criarParticipante", ParticipantesController.CreateParticipante)
 	server.GET("/compromissos/:uuid", CompromissoController.GetCompromisso)
 	server.POST("/criarCompromisso", CompromissoController.CreateCompromisso)
+	server.PATCH("/compromissos/:uuid/participantes", CompromissoController.UpdateParticipanteCompromisso)
 
 	server.Logger.Fatal(server.Start(":8080"))
 
