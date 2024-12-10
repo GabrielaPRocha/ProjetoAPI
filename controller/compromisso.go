@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go-api/model"
 	"go-api/usecase/compromisso"
+	"go-api/viewmodel"
 	"net/http"
-	"regexp"
 
 	"github.com/labstack/echo/v4"
 )
@@ -45,41 +45,26 @@ func (u *CompromissoController) CreateCompromisso(ctx echo.Context) error {
 
 }
 func (u *CompromissoController) UpdateParticipanteCompromisso(ctx echo.Context) error {
-	usuarioUUID := ctx.Param("uuid")
-	email, err := u.CompromissoUsecase.GetCompromissos(usuarioUUID)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, err)
-	}
+	compromissoUUID := ctx.Param("uuid")
 
-	var updatecompromissos model.UpdateCompromisso
-	fmt.Printf("%v\n\n\n", updatecompromissos)
-
-	err = ctx.Bind(&updatecompromissos)
-
+	var updateParticipantesCompromissos viewmodel.UpdateParticipantesCompromisso
+	err := ctx.Bind(&updateParticipantesCompromissos)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
-	updatecompromissos = email
 
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	nameRegex := `^[a-zA-Z\s]+$`
-	emailPattern, _ := regexp.Compile(emailRegex)
-	namePattern, _ := regexp.Compile(nameRegex)
-
-	if !emailPattern.MatchString(updatecompromissos.Email) {
-		return ctx.JSON(http.StatusBadRequest, err)
-	}
-	if !namePattern.MatchString(updatecompromissos.Nome) {
-		return ctx.JSON(http.StatusBadRequest, err)
+	fmt.Printf("%v\n\n\n", updateParticipantesCompromissos)
+	valid := updateParticipantesCompromissos.Validate()
+	if !valid {
+		ctx.JSON(http.StatusBadRequest, nil) // Arrumar para retornar erro
 	}
 
-	fmt.Printf("%v\n\n\n\n", updatecompromissos)
-	upCompromisso, err := u.CompromissoUsecase.GetCompromissos(updatecompromissos)
-
+	compromisso_atualizado, err := u.CompromissoUsecase.UpdateParticipantesCompromisso(compromissoUUID, updateParticipantesCompromissos.Emails)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 	}
-	fmt.Printf("%v\n\n", upCompromisso)
-	return ctx.JSON(http.StatusCreated, upCompromisso)
+
+	fmt.Printf("%v\n\n", compromisso_atualizado)
+	return ctx.JSON(http.StatusCreated, compromisso_atualizado) // Parsear para viewmodel
 
 }

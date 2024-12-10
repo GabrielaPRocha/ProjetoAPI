@@ -74,9 +74,9 @@ func (cu *CompromissoUsecase) Resolverparticipantes(listacompromisso []model.Com
 	fmt.Println(compromissoscomparticipantes)
 	return compromissoscomparticipantes, nil
 }
-func (cu *CompromissoUsecase) UpdateParticipanteCompromisso(uuidcompromisso string, lista_emails_nova []model.Participantes) ([]model.Compromisso, error) {
+func (cu *CompromissoUsecase) UpdateParticipantesCompromisso(uuid_compromisso string, lista_emails_nova []string) ([]model.Compromisso, error) {
 	// Obtém a lista atual de compromissos
-	listacompromisso, err := cu.repository.GetCompromissoUsuario(uuidcompromisso)
+	listacompromisso, err := cu.repository.GetCompromissoUsuario(uuid_compromisso)
 	if err != nil {
 		return []model.Compromisso{}, err
 	} // Valida a lista de participantes e atualiza conforme necessário
