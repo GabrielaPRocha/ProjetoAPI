@@ -49,6 +49,26 @@ func (us *CompromissoRepository) GetCompromisso() ([]model.Compromisso, error) {
 	rows.Close()
 	return CompromissoList, nil
 }
+func (us *CompromissoRepository) GetCompromissoByUuid(uuid_compromisso string) (model.Compromisso, error) {
+	query := "SELECT local_id,categoria_id,compromisso_id,horainicio,horafim FROM tb_compromisso WHERE uuid = ?"
+	row := us.connection.QueryRow(query, uuid_compromisso)
+
+	var CompromissoObj model.Compromisso
+
+	err := row.Scan(
+		&CompromissoObj.Local_id,
+		&CompromissoObj.Categoria_id,
+		&CompromissoObj.Compromisso_id,
+		&CompromissoObj.Horainicio,
+		&CompromissoObj.Horafim,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return model.Compromisso{}, err
+	}
+	return CompromissoObj, nil
+}
+
 func (us *CompromissoRepository) GetCompromissoUsuario(usuarioUUID string) ([]model.Compromisso, error) {
 	query := `SELECT local_id,categoria_id,p.compromisso_id,horainicio,horafim 
 	FROM tb_compromisso c 
@@ -125,4 +145,13 @@ func (us *CompromissoRepository) DeleteCompromisso(compromisso model.Compromisso
 		return 0, err
 	}
 	return int(rowsAffected), nil
+}
+func (us *CompromissoRepository) UpdateCompromisso(compromisso model.Compromisso) error {
+	query := "UPDATE tb_compromisso SET local_id = ?, categoria_id = ?, horainicio = ?, horafim = ? WHERE compromisso_id = ?"
+	_, err := us.connection.Exec(query, compromisso.Local_id, compromisso.Categoria_id, compromisso.Horainicio, compromisso.Horafim, compromisso.Compromisso_id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }

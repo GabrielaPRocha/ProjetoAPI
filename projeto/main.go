@@ -40,7 +40,7 @@ func main() {
 	ParticipantesController := controller.NewParticipantesController(ParticipantesUseCase)
 
 	CompromissoRepository := repository.NewCompromissoRepository(dbConnection)
-	CompromissoUsecase := compromisso.NewCompromissoUsecase(*CompromissoRepository, ParticipantesUseCase)
+	CompromissoUsecase := compromisso.NewCompromissoUsecase(*CompromissoRepository, ParticipantesUseCase, UsuarioRepository)
 	CompromissoController := controller.NewCompromissoController(CompromissoUsecase)
 
 	server.GET("/usuarios", UsuariosController.GetUsuario)

@@ -17,7 +17,7 @@ func NewParticipanteRepository(connection *sql.DB) *ParticipanteRepository {
 }
 
 func (us *ParticipanteRepository) GetParticipante() ([]model.Participantes, error) {
-	query := `SELECT idparticipantes, created_at, updated_at, delete_at, usuario_id,compromisso_id FROM tb_participantes `
+	query := `SELECT idparticipantes, created_at, updated_at, deleted_at, usuario_id,compromisso_id FROM tb_participantes `
 	rows, err := us.connection.Query(query)
 	if err != nil {
 		fmt.Println(err)
@@ -47,7 +47,7 @@ func (us *ParticipanteRepository) GetParticipante() ([]model.Participantes, erro
 }
 
 func (us *ParticipanteRepository) CreateParticipante(participante model.Participantes) (int, error) {
-	query, err := us.connection.Prepare("INSERT INTO tb_participante (usuario_id, compromisso_id) VALUES (?, ?)")
+	query, err := us.connection.Prepare("INSERT INTO tb_participantes (usuario_id, compromisso_id) VALUES (?, ?)")
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
@@ -69,7 +69,7 @@ func (us *ParticipanteRepository) CreateParticipante(participante model.Particip
 	return int(id), nil
 }
 func (us *ParticipanteRepository) DeleteParticipantes(participante model.Participantes) (int, error) {
-	query, err := us.connection.Prepare("UPDATE tb_participante SET deleted_at = ? WHERE participante_id = ?")
+	query, err := us.connection.Prepare("UPDATE tb_participantes SET deleted_at = ? WHERE idparticipantes = ?")
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
@@ -88,4 +88,36 @@ func (us *ParticipanteRepository) DeleteParticipantes(participante model.Partici
 		return 0, err
 	}
 	return int(rowsAffected), nil
+}
+func (us *ParticipanteRepository) GetUsuarioCompromisso(uuid_compromisso string) ([]model.Participantes, error) {
+	query := `SELECT p.idparticipantes,p.usuario_id,u.email,p.compromisso_id 
+	FROM tb_compromisso c 
+	JOIN tb_participantes p on c.compromisso_id = p.compromisso_id 
+	JOIN tb_usuarios u on p.usuario_id = u.usuario_id
+	WHERE c.uuid = ?`
+
+	rows, err := us.connection.Query(query, uuid_compromisso)
+	if err != nil {
+		fmt.Println(err)
+		return []model.Participantes{}, err
+	}
+	var CompromissoList []model.Participantes
+	var CompromissoObj model.Participantes
+
+	for rows.Next() {
+		err = rows.Scan(
+			&CompromissoObj.Participante_id,
+			&CompromissoObj.Usuario_id,
+			&CompromissoObj.Usuario.Email,
+			&CompromissoObj.Compromisso_id,
+		)
+		if err != nil {
+			fmt.Println(err)
+			return []model.Participantes{}, err
+		}
+		fmt.Printf("%+v", CompromissoObj)
+		CompromissoList = append(CompromissoList, CompromissoObj)
+	}
+	rows.Close()
+	return CompromissoList, nil
 }

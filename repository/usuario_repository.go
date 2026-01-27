@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"go-api/model"
+	"strings"
 
 	uuid "github.com/google/uuid"
 )
@@ -96,4 +97,44 @@ func (us *UsuarioRepository) DeleteUsuarios(usuario model.Usuarios) (int, error)
 		return 0, err
 	}
 	return int(rowsAffected), nil
+}
+func (us *UsuarioRepository) GetUsuariosByEmail(lista_email []string) ([]model.Usuarios, error) {
+	query := "SELECT usuario_id,created_at,updated_at,delete_at,nome,email,status,senha,uuid FROM tb_usuarios Where email in (%s)"
+	queryFormatada := fmt.Sprintf(query, strings.Repeat(",?", len(lista_email))[1:])
+
+	args := make([]interface{}, len(lista_email))
+	for i, v := range lista_email {
+		args[i] = v
+	}
+
+	rows, err := us.connection.Query(queryFormatada, args...)
+	if err != nil {
+		fmt.Println(err)
+		return []model.Usuarios{}, err
+	}
+	defer rows.Close()
+	var usuarioList []model.Usuarios
+	var usuariosObj model.Usuarios
+
+	for rows.Next() {
+		err = rows.Scan(
+			&usuariosObj.Usuario_id,
+			&usuariosObj.Created_at,
+			&usuariosObj.Updated_at,
+			&usuariosObj.Delete_at,
+			&usuariosObj.Nome,
+			&usuariosObj.Email,
+			&usuariosObj.Status,
+			&usuariosObj.Senha,
+			&usuariosObj.Uuid_usuario,
+		)
+
+		if err != nil {
+			fmt.Println(err)
+			return []model.Usuarios{}, err
+		}
+		usuarioList = append(usuarioList, usuariosObj)
+	}
+	return usuarioList, nil
+
 }

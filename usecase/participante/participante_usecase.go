@@ -35,10 +35,14 @@ func (pu *ParticipanteUsecase) DeleteParticipantes(participante model.Participan
 	}
 	return participante, nil
 }
+func (pu *ParticipanteUsecase) GetParticipantesCompromisso(compromisso_uuid string) ([]model.Participantes, error) {
+	return pu.repository.GetUsuarioCompromisso(compromisso_uuid)
+}
 
-func (pu *ParticipanteUsecase) UpdateParticipanteCompromisso(uuid string, newParticipantes []model.Participantes) (model.Compromisso, error) {
+/*func (pu *ParticipanteUsecase) UpdateParticipanteCompromisso(uuid string, newParticipantes []model.Participantes) (model.Compromisso, error) {
 	compromisso, err := pu.repository.GetCompromissos(uuid)
 	if err != nil {
 		return model.Compromisso{}, err
 	}
 }
+*/

@@ -8,24 +8,26 @@ import (
 )
 
 type CompromissoUsecase struct {
-	repository repository.CompromissoRepository
-	service    participante.ParticipanteUsecase
+	compromissorepository repository.CompromissoRepository
+	participanteservice   participante.ParticipanteUsecase
+	usuariorepository     repository.UsuarioRepository
 }
 
-func NewCompromissoUsecase(repo repository.CompromissoRepository, servic participante.ParticipanteUsecase) CompromissoUsecase {
+func NewCompromissoUsecase(repo repository.CompromissoRepository, servic participante.ParticipanteUsecase, usuariorepo repository.UsuarioRepository) CompromissoUsecase {
 	return CompromissoUsecase{
-		repository: repo,
-		service:    servic,
+		compromissorepository: repo,
+		participanteservice:   servic,
+		usuariorepository:     usuariorepo,
 	}
 }
 
 func (cu *CompromissoUsecase) GetCompromissos(usuarioUUID string) ([]model.Compromisso, error) {
 
-	listadecompromissos, err := cu.repository.GetCompromissoUsuario(usuarioUUID)
+	listadecompromissos, err := cu.compromissorepository.GetCompromissoUsuario(usuarioUUID)
 	if err != nil {
 		return []model.Compromisso{}, err
 	}
-	listadeparticipantes, err := cu.service.GetParticipantes()
+	listadeparticipantes, err := cu.participanteservice.GetParticipantes()
 	if err != nil {
 		return []model.Compromisso{}, err
 	}
@@ -34,7 +36,7 @@ func (cu *CompromissoUsecase) GetCompromissos(usuarioUUID string) ([]model.Compr
 }
 
 func (cu *CompromissoUsecase) CreateCompromisso(compromisso model.Compromisso) (model.Compromisso, error) {
-	compromissoID, err := cu.repository.CreateCompromisso(compromisso)
+	compromissoID, err := cu.compromissorepository.CreateCompromisso(compromisso)
 	if err != nil {
 		return model.Compromisso{}, err
 	}
@@ -43,7 +45,7 @@ func (cu *CompromissoUsecase) CreateCompromisso(compromisso model.Compromisso) (
 }
 
 func (cu *CompromissoUsecase) DeleteCompromisso(compromisso model.Compromisso) (model.Compromisso, error) {
-	_, err := cu.repository.DeleteCompromisso(compromisso)
+	_, err := cu.compromissorepository.DeleteCompromisso(compromisso)
 	if err != nil {
 		return model.Compromisso{}, err
 	}
@@ -75,31 +77,87 @@ func (cu *CompromissoUsecase) Resolverparticipantes(listacompromisso []model.Com
 	return compromissoscomparticipantes, nil
 }
 func (cu *CompromissoUsecase) UpdateParticipantesCompromisso(uuid_compromisso string, lista_emails_nova []string) ([]model.Compromisso, error) {
-	// Obtém a lista atual de compromissos
-	listacompromisso, err := cu.repository.GetCompromissoUsuario(uuid_compromisso)
+	// valida a lista de usuarios
+	usuariosEncontrados, err := cu.usuariorepository.GetUsuariosByEmail(lista_emails_nova)
 	if err != nil {
-		return []model.Compromisso{}, err
-	} // Valida a lista de participantes e atualiza conforme necessário
-	for i, compromisso := range listacompromisso {
-		// Filtra os participantes que já estão no compromisso
-		participantesExistentes := make(map[int]bool)
-		for _, participante := range compromisso.Participantes {
-			participantesExistentes[participante.Participante_id] = true
-		} // Adiciona novos participantes se não estiverem já cadastrados
-		for _, novoParticipante := range lista_emails_nova {
-			if compromisso.Compromisso_id == novoParticipante.Compromisso_id {
-				if !participantesExistentes[novoParticipante.Participante_id] {
-					compromisso.Participantes = append(compromisso.Participantes, novoParticipante)
-				}
+		return nil, err
+	}
+
+	fmt.Printf("Emails encontrados: %v", usuariosEncontrados)
+	//filtra emails validos
+
+	if len(usuariosEncontrados) == 0 {
+		return []model.Compromisso{}, fmt.Errorf("sem email valido")
+	}
+	var emailvalidado = []string{}
+	var EmailInvalido = []string{}
+	for _, email := range lista_emails_nova {
+		emailValido := false
+		for _, usuario := range usuariosEncontrados {
+			if email == usuario.Email {
+				emailValido = true
+				emailvalidado = append(emailvalidado, email)
+				break
 			}
-		} // Atualiza o compromisso na lista
-		listacompromisso[i] = compromisso
-	} // Atualiza os compromissos no repositório
-	for _, compromisso := range listacompromisso {
-		err := cu.repository.(compromisso)
-		if err != nil {
-			return []model.Compromisso{}, err
+		}
+		if !emailValido {
+			EmailInvalido = append(EmailInvalido, email)
 		}
 	}
-	return listacompromisso, nil
+	fmt.Printf("\n\nemail inválido: %s", EmailInvalido)
+	fmt.Printf("\nemail Valido: %s", emailvalidado)
+	if len(EmailInvalido) > 0 {
+		return nil, fmt.Errorf("email inválido: %s", EmailInvalido)
+	}
+
+	compromisso, err := cu.compromissorepository.GetCompromissoByUuid(uuid_compromisso)
+	if err != nil {
+		return nil, fmt.Errorf("Compromisso não encontrado: %v", err)
+	}
+	fmt.Printf("Compromisso encontrado: %v\n", compromisso)
+	fmt.Print(compromisso)
+
+	participantesAtuais, err := cu.participanteservice.GetParticipantesCompromisso(uuid_compromisso)
+	if err != nil {
+		return nil, fmt.Errorf("Erro ao obter participantes do compromisso: %v", err)
+	}
+	fmt.Printf("Participantes atuais: %v\n", participantesAtuais)
+	participantesExistentes := make(map[string]bool)
+	for _, participante := range participantesAtuais {
+		participantesExistentes[participante.Usuario.Email] = true
+	}
+	// Remove todos os participantes atuais do compromisso
+	for _, participante := range participantesAtuais {
+		_, err := cu.participanteservice.DeleteParticipantes(participante)
+		if err != nil {
+			return nil, fmt.Errorf("Erro ao remover participante do compromisso: %v", err)
+		}
+	}
+
+	// Adiciona novos participantes ao compromisso
+	for _, email := range emailvalidado {
+		usuarios, err := cu.usuariorepository.GetUsuariosByEmail([]string{email})
+		if err != nil {
+			return nil, fmt.Errorf("Erro ao buscar usuário por e-mail: %v", err)
+		}
+		if len(usuarios) == 0 {
+			return nil, fmt.Errorf("Nenhum usuário encontrado com o e-mail: %s", email)
+		}
+		usuario := usuarios[0]
+
+		novoParticipante := model.Participantes{
+			Usuario_id:     usuario.Usuario_id,
+			Compromisso_id: compromisso.Compromisso_id,
+		}
+		_, err = cu.participanteservice.CreateParticipante(novoParticipante)
+		if err != nil {
+			return nil, fmt.Errorf("Erro ao adicionar novo participante: %v", err)
+		}
+	}
+
+	// Retorna o compromisso atualizado
+
+	fmt.Printf("Compromisso atualizado: %v\n", compromisso)
+
+	return []model.Compromisso{compromisso}, nil
 }
